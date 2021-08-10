@@ -23,6 +23,21 @@ class V2XMsg(Resource):
     def isNulo(self, v2x_message):
         return v2x_message['msgContent'] == None and v2x_message['msgEncodeFormat'] == None and v2x_message['msgType'] == None and v2x_message['stdOrganization'] == None
 
+    def find_message(self, credential):
+        for v2xmsg in lista_v2xmsg:
+            if v2xmsg['msgType'] == credential:
+                return v2xmsg
+            return None
+
+    # funcao get: retorna o JSON requisitado da provisioning info
+    def get(self, credential):
+
+        v2xmsg = V2XMsg.find_message(credential)
+
+        if v2xmsg:
+            return v2xmsg
+
+        return {'message': 'Provisioning info not found.'}, 404 # not found
 
     # funcao post: retorna o JSON de response
     def post(self, credential):
