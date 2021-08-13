@@ -12,10 +12,9 @@ async def main():
     requisicao = Message(code=GET, uri='coap://localhost/time')
 
     try:
-        response = await protocol.request(requisicao).response
+        response = await protocolo.request(requisicao).response
     except Exception as e:
         print('Falha ao buscar recurso: ')
         print(e)
     else:
-        print('Resultado: %s\n%r'%(response.code, response.payload))
-    
+        print('Resultado: %s\n%r'%(requisicao.code, requisicao.payload))
