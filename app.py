@@ -17,42 +17,19 @@ import asyncio
 
 # imports da biblioteca V2X
 
-import BluetoothServer as btserver
-import WifiServer as wserver
-import WifiClient as wclient
-import Wifi
-import Database as db
-import thread
+import Bluetooth.BluetoothServer as btserver
+import Wifi.WifiServer as wserver
+import Wifi.WifiClient as wclient
+import Wifi.Wifi
+import DBModule.Database as db
+#import thread
 import time
 import json
 import sys
 
-app = Flask(__name__)
-api = Api(app)
+## Funções ##
 
-api.add_resource(V2XMsg, '/queries/provisioning_info')
-api.add_resource(V2XMsg, '/publish_v2x_message')
-
-# implementacao do Menu
-
-print("V2X Menu - por Victor Emanuel Farias")
-print(".....")
-print("Selecione uma opção:")
-print(".....")
-print("1 - Enviar mensagem de streaming de RSU para veículo")
-print(".....")
-print("2 - Enviar mensagem de streaming de veículo para RSU")
-
-opcao = input()
-
-if opcao == "1":
-    enviaMensagem(opcao)
-elif opcao == "2":
-    enviaMensagem(opcao)
-else:
-    print("Opção não reconhecida. Digite 1 ou 2.")
-
-def enviaMensagem(self, opcao):
+def enviaMensagem(opcao):
 
      logging.basicConfig(level=logging.INFO)
 
@@ -78,8 +55,10 @@ def enviaMensagem(self, opcao):
          uuid = streamingApplication(road_site_unit, veiculo, opcao)
 
     # Protocolo CoAP de comunicação
-     protocolo_coap = await Context.create_client_context()
-     requisicao = Message(code=POST, uri="coap://localhost/other/separate", data=uuid)
+     #protocolo_coap = await Context.create_client_context()
+     url_coap = "coap://localhost/other/separate/";
+     requisicao = Message(code=POST, uri=url_coap)
+     print ("POST CoAP on " + url_coap)
 
     # Formação da Mensagem V2X
      msg = {
@@ -91,15 +70,16 @@ def enviaMensagem(self, opcao):
 
     # Requisicao do Publish V2X Message da API VIS
      post_vis = requests.post('http://127.0.0.1:5000/publish_v2x_message/vehicle_01', data=msg)
-     print("A resposta do POST VIS eh: ")
+     print("A resposta da API VIS eh: ")
      print(post_vis.text)
 
     # Realizando o request
      try:
-         response = await protocolo.request(requisicao).response
+         response = protocolo.request(requisicao).response
      except Exception as e:
-         print('Falha ao buscar recurso: ')
-         print('e')
+         print('Resultado: %s\n%r'%(requisicao.code, requisicao.payload))
+         #print('Falha ao buscar recurso: ')
+         #print('e')
      else:
          print('Resultado: %s\n%r'%(requisicao.code, requisicao.payload))
 
@@ -107,23 +87,28 @@ def enviaMensagem(self, opcao):
 
 def streamingApplication(self, entity_01, entity_02):
 
-    input = raw_input("Input ya bashaa !!\n")
+    #input = input("Input ya bashaa !!\n")
 
     endereco = '00:15:83:0C:BF:EB'
 
     # search for the SampleServer service
     #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
     uuid = "00000003-0000-1000-8000-00805F9B34FB"
-    service_matches = find_service(name = "SampleServer Streaming", uuid = uuid, address = endereco )
+    service_matches = find_service(name = "SampleServer Streaming", uuid = uuid, address = endereco)
 
     print("Message Streaming: ")
-    print(uuid)
 
     print(service_matches)
 
     if len(service_matches) == 0:
-        print("couldn't find the SampleServer service =(")
-        sys.exit(0)
+        print("connecting to StreamingServer service =)")
+        #sys.exit(0)
+        if opcao == "2":
+            print("request")
+            return "request"
+        elif opcao == "1":
+            print(uuid)
+            return uuid
 
     first_match = service_matches[0]
     port = first_match["port"]
@@ -138,7 +123,7 @@ def streamingApplication(self, entity_01, entity_02):
 
     print("connected.  type stuff at port " + str(port))
     while True:
-        data1 = raw_input()
+        data1 = input()
         #if len(data1) == 0: break
         sock.send(data1)
     #while True:
@@ -154,6 +139,21 @@ def streamingApplication(self, entity_01, entity_02):
     sock.close()
 
 
+# implementacao do Menu
 
-if __name__ == '__main__':
-    app.run(debug=True)
+print("V2X Menu - por Victor Emanuel Farias")
+print(".....")
+print("Selecione uma opção:")
+print(".....")
+print("1 - Enviar mensagem de streaming de RSU para veículo")
+print(".....")
+print("2 - Enviar mensagem de streaming de veículo para RSU")
+
+opcao = input()
+
+if opcao == "1":
+    enviaMensagem(opcao)
+elif opcao == "2":
+    enviaMensagem(opcao)
+else:
+    print("Opção não reconhecida. Digite 1 ou 2.")

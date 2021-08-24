@@ -51,7 +51,7 @@ class V2XMsg(Resource):
         'stdOrganization': dados['stdOrganization']
         }
 
-        if isNulo(v2x_message):
+        if v2x_message['msgContent'] == None and v2x_message['msgEncodeFormat'] == None and v2x_message['msgType'] == None and v2x_message['stdOrganization'] == None:
             return "No Content", 204
 
         elif credential not in lista_elementos:
