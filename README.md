@@ -1,5 +1,5 @@
-# V2XInformationServiceAPI
-Implementação da VIS API para minha pesquisa.
+# V2X Menu - V2XInformationServiceAPI
+Implementação do V2X Menu para pesquisa do mestrado.
 
 ## Rodando a biblioteca AIOCoAP
 
