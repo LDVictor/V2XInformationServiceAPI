@@ -3,7 +3,8 @@ from flask_restful import Api
 from resources.v2xmsg import V2XMsg
 from models.vehicle import VehicleModel
 from models.rsu import RSUModel
-from bluetooth import *
+#from bluetooth import *
+import requests
 
 # import para requisicao
 
@@ -17,7 +18,7 @@ import asyncio
 
 # imports da biblioteca V2X
 
-import Bluetooth.BluetoothServer as btserver
+#import Bluetooth.BluetoothServer as btserver
 import Wifi.WifiServer as wserver
 import Wifi.WifiClient as wclient
 import Wifi.Wifi
@@ -49,16 +50,25 @@ def enviaMensagem(opcao):
 
      # Chamada da aplicação V2X de Streaming
 
-     if opcao == "1":
+     if opcao == "1" or opcao == "3":
          uuid = streamingApplication(veiculo, road_site_unit, opcao)
      else:
          uuid = streamingApplication(road_site_unit, veiculo, opcao)
 
-    # Protocolo CoAP de comunicação
-     #protocolo_coap = await Context.create_client_context()
-     url_coap = "coap://localhost/other/separate/";
-     requisicao = Message(code=POST, uri=url_coap)
-     print ("POST CoAP on " + url_coap)
+     if opcao == "1" or opcao == "2":
+         # Protocolo CoAP de comunicação
+         # protocolo_coap = await Context.create_client_context()
+         url_coap = "coap://localhost/other/separate/"
+         requisicao = Message(code=POST, uri=url_coap)
+         print ("POST CoAP on " + url_coap)
+     else:
+         # Protocolo HTTP de comunicação
+         url_http = 'http://localhost/other/separate/'
+         r = requests.post(url_http, data={'key': 'message'})
+         print ("POST HTTP on " + url_http)
+
+
+
 
     # Formação da Mensagem V2X
      msg = {
@@ -94,11 +104,12 @@ def streamingApplication(self, entity_01, entity_02):
     # search for the SampleServer service
     #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
     uuid = "00000003-0000-1000-8000-00805F9B34FB"
-    service_matches = find_service(name = "SampleServer Streaming", uuid = uuid, address = endereco)
+    #service_matches = find_service(name = "SampleServer Streaming", uuid = uuid, address = endereco)
+    service_matches = []
 
     print("Message Streaming: ")
 
-    print(service_matches)
+    #print(service_matches)
 
     if len(service_matches) == 0:
         print("connecting to StreamingServer service =)")
@@ -110,22 +121,22 @@ def streamingApplication(self, entity_01, entity_02):
             print(uuid)
             return uuid
 
-    first_match = service_matches[0]
-    port = first_match["port"]
-    name = first_match["name"]
-    host = first_match["host"]
+    #first_match = service_matches[0]
+    #port = first_match["port"]
+    #name = first_match["name"]
+    #host = first_match["host"]
 
-    print("connecting to \"%s\" on %s" % (name, host))
+    #print("connecting to \"%s\" on %s" % (name, host))
 
     # Create the client socket
-    sock=BluetoothSocket( RFCOMM )
-    sock.connect((host, port))
+    #sock=BluetoothSocket( RFCOMM )
+    #sock.connect((host, port))
 
-    print("connected.  type stuff at port " + str(port))
-    while True:
-        data1 = input()
+    #print("connected.  type stuff at port " + str(port))
+   # while True:
+   #     data1 = input()
         #if len(data1) == 0: break
-        sock.send(data1)
+   #     sock.send(data1)
     #while True:
     #   data1 = sock.recv(1024)
     #   if len(data1) == 0: break
@@ -145,9 +156,13 @@ print("V2X Menu - por Victor Emanuel Farias")
 print(".....")
 print("Selecione uma opção:")
 print(".....")
-print("1 - Enviar mensagem de streaming de RSU para veículo")
+print("1 - Enviar mensagem de streaming de RSU para veículo com CoAP")
 print(".....")
-print("2 - Enviar mensagem de streaming de veículo para RSU")
+print("2 - Enviar mensagem de streaming de veículo para RSU com CoAP")
+print(".....")
+print("3 - Enviar mensagem de streaming de veículo para RSU com HTTP")
+print(".....")
+print("4 - Enviar mensagem de streaming de veículo para RSU com HTTP")
 
 opcao = input()
 
@@ -155,5 +170,9 @@ if opcao == "1":
     enviaMensagem(opcao)
 elif opcao == "2":
     enviaMensagem(opcao)
+elif opcao == "3":
+    enviaMensagem(opcao)
+elif opcao == "4":
+    enviaMensagem(opcao)
 else:
-    print("Opção não reconhecida. Digite 1 ou 2.")
+    print("Opção não reconhecida. Digite 1, 2, 3 ou 4.")
