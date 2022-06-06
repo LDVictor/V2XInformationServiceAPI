@@ -27,6 +27,7 @@ import DBModule.Database as db
 import time
 import json
 import sys
+import time
 
 ## Funções ##
 
@@ -50,6 +51,8 @@ def enviaMensagem(opcao):
 
      # Chamada da aplicação V2X de Streaming
 
+     start = time.time()
+
      if opcao == "1" or opcao == "3":
          uuid = streamingApplication(veiculo, road_site_unit, opcao)
      else:
@@ -63,8 +66,8 @@ def enviaMensagem(opcao):
          print ("POST CoAP on " + url_coap)
      else:
          # Protocolo HTTP de comunicação
-         url_http = 'http://localhost/other/separate/'
-         r = requests.post(url_http, data={'key': 'message'})
+         url_http = 'http://127.0.0.1:5000/publish_v2x_message/vehicle_01'
+         requisicao = requests.post(url_http, data={'key': 'message'})
          print ("POST HTTP on " + url_http)
 
 
@@ -85,13 +88,20 @@ def enviaMensagem(opcao):
 
     # Realizando o request
      try:
-         response = protocolo.request(requisicao).response
+         # vai ter que ver outra maneira para simular o HTTP
+         url_http = 'http://127.0.0.1:5000/publish_v2x_message/vehicle_01'
+         requisicao = requests.post(url_http, data={'key': 'message'})
      except Exception as e:
-         print('Resultado: %s\n%r'%(requisicao.code, requisicao.payload))
+         end = time.time()
+         print('Resultado: %s'%(requisicao.history))
+         print(end - start)
          #print('Falha ao buscar recurso: ')
          #print('e')
      else:
-         print('Resultado: %s\n%r'%(requisicao.code, requisicao.payload))
+         end = time.time()
+         print('Resultado: %s'%(requisicao.history))
+         print(end - start)
+
 
 ##### Funcoes Auxiliares #####
 
@@ -114,10 +124,10 @@ def streamingApplication(self, entity_01, entity_02):
     if len(service_matches) == 0:
         print("connecting to StreamingServer service =)")
         #sys.exit(0)
-        if opcao == "2":
+        if opcao == "2" or opcao == "4":
             print("request")
             return "request"
-        elif opcao == "1":
+        elif opcao == "1" or opcao == "3":
             print(uuid)
             return uuid
 
@@ -142,12 +152,12 @@ def streamingApplication(self, entity_01, entity_02):
     #   if len(data1) == 0: break
     #   print("Received [%s]" %data1)
 
-    if opcao == "1":
+    if opcao == "1" or opcao == "3":
         return "request"
     else:
         return uuid
 
-    sock.close()
+    #sock.close()
 
 
 # implementacao do Menu
@@ -158,11 +168,11 @@ print("Selecione uma opção:")
 print(".....")
 print("1 - Enviar mensagem de streaming de RSU para veículo com CoAP")
 print(".....")
-print("2 - Enviar mensagem de streaming de veículo para RSU com CoAP")
+print("2 - Enviar mensagem de request de veículo para RSU com CoAP")
 print(".....")
 print("3 - Enviar mensagem de streaming de veículo para RSU com HTTP")
 print(".....")
-print("4 - Enviar mensagem de streaming de veículo para RSU com HTTP")
+print("4 - Enviar mensagem de request de veículo para RSU com HTTP")
 
 opcao = input()
 
